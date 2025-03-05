@@ -198,18 +198,18 @@ class PromptKDRotatedFCOS(PromptKDSingleStage):
         
     
     def reuse_teacher_head(self, stu_cls_feat,stu_reg_feat,tea_cls_feat,tea_reg_feat,scale, stride):
-        # reused_cls_feat = self.align_scale(stu_cls_feat, tea_cls_feat)
-        # reused_reg_feat = self.align_scale(stu_reg_feat, tea_reg_feat)
+        reused_cls_feat = self.align_scale(stu_cls_feat, tea_cls_feat)
+        reused_reg_feat = self.align_scale(stu_reg_feat, tea_reg_feat)
         if self.reused_teacher_head_idx != 0:
-            reused_cls_feat_stu = F.relu(stu_cls_feat)
-            reused_reg_feat_stu = F.relu(stu_reg_feat)
+            reused_cls_feat_stu = F.relu(reused_cls_feat)
+            reused_reg_feat_stu = F.relu(reused_reg_feat)
            
            
         module_tea = self.teacher.bbox_head
         module_stu = self.bbox_head
         for i in range(self.reused_teacher_head_idx, module_tea.stacked_convs):
-            reused_cls_feat_stu = module_stu.cls_convs[i](tea_cls_feat)
-            reused_reg_feat_stu = module_stu.reg_convs[i](tea_reg_feat)
+            reused_cls_feat_stu = module_tea.cls_convs[i](reused_cls_feat_stu)
+            reused_reg_feat_stu = module_stu.reg_convs[i](reused_reg_feat_stu)
             
         reused_cls_score = module_tea.conv_cls(reused_cls_feat_stu)
         reused_bbox_pred = scale(module_tea.conv_reg(reused_reg_feat_stu)).float()
