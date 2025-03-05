@@ -164,10 +164,9 @@ class PromptKDRotatedRetinaNet(PromptKDSingleStage):
             reused_cls_feat_stu = F.relu(reused_cls_feat)
             reused_reg_feat_stu = F.relu(reused_reg_feat)
         module_tea = self.teacher.bbox_head
-        module_stu = self.bbox_head 
         for i in range(self.reused_teacher_head_idx, module_tea.stacked_convs):
-            reused_cls_feat_stu = module_stu.cls_convs[i](stu_cls_feat)
-            reused_reg_feat_stu = module_stu.reg_convs[i](stu_reg_feat)
+            reused_cls_feat_stu = module_tea.cls_convs[i](reused_cls_feat_stu)
+            reused_reg_feat_stu = module_tea.reg_convs[i](reused_reg_feat_stu)
         reused_cls_score = module_tea.retina_cls(reused_cls_feat_stu)
         reused_bbox_pred = module_tea.retina_reg(reused_reg_feat_stu)
         return reused_cls_score, reused_bbox_pred 
